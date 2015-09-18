@@ -1,2 +1,2 @@
-# Metadata API
-Video metadata API micro-service on Node.js.
+# Dockerized Images API
+Images API micro-service on Node.js.
