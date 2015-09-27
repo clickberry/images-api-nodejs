@@ -1,25 +1,43 @@
+// env
+if (!process.env.TOKEN_ACCESSSECRET) {
+  console.log("TOKEN_ACCESSSECRET environment variable required.");
+  process.exit(1);
+}
+if (!process.env.REDIS_ADDRESS) {
+  console.log("REDIS_ADDRESS environment variable required.");
+  process.exit(1);
+}
+
 var app = require('..');
 var request = require('supertest');
 var assert = require('assert');
 var uuid = require('node-uuid');
+var jwt = require('jsonwebtoken');
+var imageFilePath = 'test/files/test.png';
 
-function createItem(id, attrs, fn) {
+function getAuthToken(userId) {
+  return jwt.sign({ userId: userId }, process.env.TOKEN_ACCESSSECRET);
+}
+
+function createItem(fn) {
+  var userId = uuid.v4();
+  var auth_token = getAuthToken(userId);
+
   request(app)
-    .post('/' + id)
+    .post('/?auth_token=' + auth_token)
     .timeout(5000)
-    .field('attributes', JSON.stringify(attrs))
-    .attach('avatar', 'test/files/test.json')
+    .attach('avatar', imageFilePath)
     .set('Accept', 'application/json')
     .expect('Content-Type', /json/)
     .expect(201)
     .end(function (err, res) {
-      fn(err, res.body);
+      fn(err, { body: res.body, auth_token: auth_token });
     });
 }
 
 describe('GET /', function () {
   var id = uuid.v4();
-  it('get unexisting metadata', function (done) {
+  it('get unexisting image', function (done) {
     request(app)
       .get('/' + id)
       .expect(404, done);
@@ -27,79 +45,71 @@ describe('GET /', function () {
 });
 
 describe('POST /', function () {
-  var metadata = {};
+  var image = {};
+  var image_auth_token;
 
   after(function (done) {
     request(app)
-      .del('/' + metadata.id)
+      .del('/' + image.id + '?auth_token=' + image_auth_token)
       .expect(200)
       .end(done);
   });
 
-  it('create metadata', function (done) {
-    var id = uuid.v4();
-    createItem(id, { 'prop1': 'val1', 'prop2': 'val2' }, function (err, data) {
+  it('create image without authorization', function (done) {
+    request(app)
+      .post('/')
+      .timeout(5000)
+      .attach('avatar', imageFilePath)
+      .expect(401, done);
+  });
+
+  it('create image', function (done) {
+    createItem(function (err, data) {
       if (err) { return done(err); }
-      metadata = data;
+      image = data.body;
+      image_auth_token = data.auth_token;
       done();
     });
   });
 
-  it('trying to query by id and should receive the same metadata', function (done) {
+  it('get file by url', function (done) {
     request(app)
-      .get('/' + metadata.id)
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(metadata, done);
-  });
-});
-
-describe('PUT /', function () {
-  var metadata = {};
-  var attrs = { 'prop1': 'val1', 'prop2': 'val2' };
-
-  after(function (done) {
-    request(app)
-      .del('/' + metadata.id)
+      .head(image.url)
       .expect(200)
       .end(done);
   });
 
-  it('create metadata', function (done) {
-    var id = uuid.v4();
-    createItem(id, attrs, function (err, data) {
-      if (err) { return done(err); }
-      metadata = data;
-      done();
-    });
-  });
-
-  it('updating only metadata properties', function (done) {
-    attrs.prop1 = "newval1";
-    metadata.attributes = attrs;
+  it('query by id', function (done) {
     request(app)
-      .put('/' + metadata.id)
-      .send({ attributes: attrs })
+      .get('/' + image.id)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(metadata, done);
+      .expect(image, done);
   });
 });
 
 describe('DELETE /', function () {
-  var metadata = {};
-  var id = uuid.v4();
-  it('create metadata', function (done) {
-    createItem(id, null, function (err, data) {
+  var image = {};
+  var image_auth_token;
+
+  it('create image', function (done) {
+    createItem(function (err, data) {
       if (err) { return done(err); }
-      metadata = data;
+      image = data.body;
+      image_auth_token = data.auth_token;
       done();
     });
   });
 
-  it('delete it, should return 200 OK', function (done) {
+  it('delete image without authorization', function (done) {
     request(app)
-      .del('/' + metadata.id)
+      .del('/' + image.id)
+      .expect(401, done);
+  });
+
+  it('delete by id', function (done) {
+    request(app)
+      .del('/' + image.id + '?auth_token=' + image_auth_token)
       .expect(200, done);
   });
 });
