@@ -14,6 +14,7 @@ var assert = require('assert');
 var uuid = require('node-uuid');
 var jwt = require('jsonwebtoken');
 var imageFilePath = 'test/files/test.png';
+var nonImageFilePath = 'test/files/test.json';
 
 function getAuthToken(userId) {
   return jwt.sign({ userId: userId }, process.env.TOKEN_ACCESSSECRET);
@@ -61,6 +62,13 @@ describe('POST /', function () {
       .timeout(5000)
       .attach('avatar', imageFilePath)
       .expect(401, done);
+  });
+
+  it('create image with non-image file', function (done) {
+    request(app)
+      .post('/')
+      .attach('avatar', nonImageFilePath)
+      .expect(400, done);
   });
 
   it('create image', function (done) {
