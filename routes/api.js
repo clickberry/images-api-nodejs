@@ -35,15 +35,11 @@ function getBlobUrl(bucket_name, key_name) {
 }
 
 function checkFileSize(res, bytesCount) {
-  if (maxFileSize < bytesCount) {
-    return res.status(400).send({ message: 'File is too large.' });
-  }
+  return maxFileSize >= bytesCount;
 }
 
 function checkIsImageFile(res, mimetype) {
-  if (0 !== mimetype.indexOf('image/')) {
-    return res.status(400).send({ message: 'Bad Request: expecting image/* file' });
-  }
+  return 0 === mimetype.indexOf('image/');
 }
 
 router.get('/heartbeat', function (req, res) {
@@ -67,8 +63,12 @@ router.post('/',
     var form = new multiparty.Form();
 
     form.on('part', function (part) {
-      checkFileSize(res, part.byteCount);
-      checkIsImageFile(res, part.headers['content-type']);
+      if (!checkFileSize(res, part.byteCount)) {
+        return res.status(400).send({ message: 'File is too large.' });
+      }
+      if (!checkIsImageFile(res, part.headers['content-type'])) {
+        return res.status(400).send({ message: 'Bad Request: expecting image/* file' });
+      }
 
       debug("Uploading file of size: " + part.byteCount);
 
@@ -152,8 +152,12 @@ router.put('/:id',
       var form = new multiparty.Form();
 
       form.on('part', function (part) {
-        checkFileSize(res, part.byteCount);
-        checkIsImageFile(res, part.headers['content-type']);
+        if (!checkFileSize(res, part.byteCount)) {
+          return res.status(400).send({ message: 'File is too large.' });
+        }
+        if (!checkIsImageFile(res, part.headers['content-type'])) {
+          return res.status(400).send({ message: 'Bad Request: expecting image/* file' });
+        }
 
         debug("Uploading file of size: " + part.byteCount);
 
@@ -234,7 +238,7 @@ router.delete('/:id', function (req, res, next) {
 
         var imageModel = ImageModel.create();
         imageModel.update(image, '*');
-        var json = imageModel.toJSON());
+        var json = imageModel.toJSON();
 
         debug("Image deleted: " + JSON.stringify(json));
         res.send();

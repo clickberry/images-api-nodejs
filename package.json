@@ -18,7 +18,8 @@
     "redis": "^0.12.1"
   },
   "devDependencies": {
-    "supertest": "^1.1.0"
+    "supertest": "^1.1.0",
+    "jsonwebtoken": "^5.0.5"
   },
   "scripts": {
     "start": "node ./bin/www",

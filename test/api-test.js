@@ -7,6 +7,10 @@ if (!process.env.REDIS_ADDRESS) {
   console.log("REDIS_ADDRESS environment variable required.");
   process.exit(1);
 }
+if (!process.env.S3_BUCKET) {
+  console.log("S3_BUCKET environment variable required.");
+  process.exit(1);
+}
 
 var app = require('..');
 var request = require('supertest');
@@ -26,8 +30,7 @@ function createItem(fn) {
 
   request(app)
     .post('/?auth_token=' + auth_token)
-    .timeout(5000)
-    .attach('avatar', imageFilePath)
+    .attach('image', imageFilePath)
     .set('Accept', 'application/json')
     .expect('Content-Type', /json/)
     .expect(201)
@@ -46,6 +49,8 @@ describe('GET /', function () {
 });
 
 describe('POST /', function () {
+  this.timeout(30000);
+
   var image = {};
   var image_auth_token;
 
@@ -59,15 +64,17 @@ describe('POST /', function () {
   it('create image without authorization', function (done) {
     request(app)
       .post('/')
-      .timeout(5000)
       .attach('avatar', imageFilePath)
       .expect(401, done);
   });
 
   it('create image with non-image file', function (done) {
+    var userId = uuid.v4();
+    var auth_token = getAuthToken(userId);
+
     request(app)
-      .post('/')
-      .attach('avatar', nonImageFilePath)
+      .post('/?auth_token=' + auth_token)
+      .attach('image', nonImageFilePath)
       .expect(400, done);
   });
 
