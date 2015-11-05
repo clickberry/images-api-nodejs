@@ -29,7 +29,7 @@ MAX_FILE_SIZE | 1024 * 1024 * 10 | Maximum file size.
 # API
 
 ## GET /{id}
-Gets image by id.
+Gets an image by id.
 
 ### Response
 | HTTP       | Value     |
@@ -38,7 +38,7 @@ Gets image by id.
 | Body       | { "id": *id*, url: *image_url* } |
 
 ## POST /
-Uploads image file.
+Uploads an image file.
 
 ### Request
 | Header   | Value |
@@ -57,7 +57,7 @@ Uploads image file.
 | Body       | { "id": *id*, url: *image_url* } |
 
 ## DELETE /{id}
-Deletes image by id.
+Deletes an image by id.
 
 ### Request
 | Header   | Value |
