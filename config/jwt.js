@@ -10,7 +10,6 @@ module.exports = function (passport) {
   passport.use('access-token', new JwtStrategy({
     secretOrKey: process.env.TOKEN_ACCESSSECRET
   }, function (jwtPayload, done) {
-    console.log('AUTH: ' + JSON.stringify(jwtPayload));
     done(null, jwtPayload);
   }));
 };
