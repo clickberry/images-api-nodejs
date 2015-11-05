@@ -14,7 +14,7 @@ The application is a REST API with database (Redis) and AWS (S3) dependencies.
 * Node.js
 * Redis/node_redis
 * Express.js
-* S3
+* AWS S3
 
 # Environment Variables
 The service should be properly configured with following environment variables.
