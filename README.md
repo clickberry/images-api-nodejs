@@ -8,12 +8,13 @@ Images API micro-service on Node.js. The API is used for uploading arbitrary ima
 * [License](#license)
 
 # Architecture
-The application is a REST API with database (Redis) dependency.
+The application is a REST API with database (Redis) and AWS (S3) dependencies.
 
 # Technologies
 * Node.js
 * Redis/node_redis
 * Express.js
+* S3
 
 # Environment Variables
 The service should be properly configured with following environment variables.
