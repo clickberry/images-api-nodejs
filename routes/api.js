@@ -129,7 +129,7 @@ router.get('/:id',
   });
 
 router.put('/:id',
-  passport.authenticate('access-token', { session: false, assignProperty: 'payload' }),
+  passport.authenticate('access-token', { session: false }),
   function (req, res, next) {
     if (!isFormData(req)) {
       return res.status(400).send({ message: 'Bad Request: expecting multipart/form-data' });
@@ -216,6 +216,7 @@ router.put('/:id',
   });
 
 router.delete('/:id', function (req, res, next) {
+  passport.authenticate('access-token', { session: false }),
   Image.get(req.params.id, function (err, data) {
     if (err) { return next(err); }
     if (!data) {
@@ -235,12 +236,7 @@ router.delete('/:id', function (req, res, next) {
         Key: key,
       }, function (err) {
         if (err) { return next(err); }
-
-        var imageModel = ImageModel.create();
-        imageModel.update(image, '*');
-        var json = imageModel.toJSON();
-
-        debug("Image deleted: " + JSON.stringify(json));
+        debug("Image deleted: " + JSON.stringify(image));
         res.send();
       });
     });

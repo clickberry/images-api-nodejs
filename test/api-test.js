@@ -14,6 +14,7 @@ if (!process.env.S3_BUCKET) {
 
 var app = require('..');
 var request = require('supertest');
+var superagent = require('superagent');
 var assert = require('assert');
 var uuid = require('node-uuid');
 var jwt = require('jsonwebtoken');
@@ -88,10 +89,12 @@ describe('POST /', function () {
   });
 
   it('get file by url', function (done) {
-    request(app)
-      .head(image.url)
-      .expect(200)
-      .end(done);
+    superagent
+      .get(image.url)
+      .end(function (err, response) {
+        assert.equal(response.status, 200);
+        done();
+      });
   });
 
   it('query by id', function (done) {
