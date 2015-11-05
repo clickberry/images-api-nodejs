@@ -2,12 +2,14 @@ var express = require('express');
 var path = require('path');
 var bodyParser = require('body-parser');
 var logger = require('morgan');
-var debug = require('debug')('clickberry:images:api');
+var cors = require('cors');
 
 var routes = require('./routes');
 var api = require('./routes/api');
 
 var app = express();
+
+app.use(cors({ allowedHeaders: 'Authorization, Content-Type' }));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

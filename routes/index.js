@@ -20,7 +20,7 @@ exports.notfound = function (req, res) {
 };
 
 exports.error = function (err, req, res, next) {
-  debug(err.stack);
+  console.log(err.stack);
   var msg;
 
   switch (err.type) {

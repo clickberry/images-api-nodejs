@@ -215,32 +215,33 @@ router.put('/:id',
     });
   });
 
-router.delete('/:id', function (req, res, next) {
+router.delete('/:id', 
   passport.authenticate('access-token', { session: false }),
-  Image.get(req.params.id, function (err, data) {
-    if (err) { return next(err); }
-    if (!data) {
-      return res.status(404).send({ message: 'Resource not found' });
-    }
-
-    Image.del(req.params.id, function (err) {
+  function (req, res, next) {
+    Image.get(req.params.id, function (err, data) {
       if (err) { return next(err); }
+      if (!data) {
+        return res.status(404).send({ message: 'Resource not found' });
+      }
 
-      var image = data;
-
-      // delete file
-      var parsedUrl = url.parse(image.url);
-      var key = path.basename(parsedUrl.pathname);
-      s3.deleteObject({
-        Bucket: bucket,
-        Key: key,
-      }, function (err) {
+      Image.del(req.params.id, function (err) {
         if (err) { return next(err); }
-        debug("Image deleted: " + JSON.stringify(image));
-        res.send();
+
+        var image = data;
+
+        // delete file
+        var parsedUrl = url.parse(image.url);
+        var key = path.basename(parsedUrl.pathname);
+        s3.deleteObject({
+          Bucket: bucket,
+          Key: key,
+        }, function (err) {
+          if (err) { return next(err); }
+          debug("Image deleted: " + JSON.stringify(image));
+          res.send();
+        });
       });
     });
-  });
 });
 
 module.exports = router;
