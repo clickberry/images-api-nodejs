@@ -1,5 +1,5 @@
 # Dockerized Images API
-Images API micro-service on Node.js.
+Images API micro-service on Node.js. The API is used for uploading arbitrary images to the S3 bucket.
 
 * [Architecture](#architecture)
 * [Technologies](#technologies)
