@@ -35,7 +35,7 @@ Gets an image by id.
 | HTTP       | Value     |
 |------------|-----------|
 | StatusCode | 200       |
-| Body       | { "id": *id*, url: *image_url* } |
+| Body       | { "id": *id*, "url": *image_url* } |
 
 ## POST /
 Uploads an image file.
@@ -54,7 +54,7 @@ Uploads an image file.
 | HTTP       | Value     |
 |------------|-----------|
 | StatusCode | 201       |
-| Body       | { "id": *id*, url: *image_url* } |
+| Body       | { "id": *id*, "url": *image_url* } |
 
 ## DELETE /{id}
 Deletes an image by id.
